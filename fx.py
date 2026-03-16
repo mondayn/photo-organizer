@@ -23,7 +23,6 @@ from face_recognition import (
     compare_faces
 )
 
-RESULTS = 'data.parquet'
 
 #endregion imports
 
@@ -44,110 +43,68 @@ def print_cols(df):
     print(list(df.columns))
     return df
 
-for fx in [ add_col, print_cols ]:
+def print_shape(df):
+    print(df.shape)
+    return df
+
+def get_dupes(df,column_names): 
+    return df.loc[df.duplicated(subset=column_names, keep=False)]
+
+for fx in [ add_col, print_cols, get_dupes, print_shape ]:
     setattr(pd.DataFrame, fx.__name__, fx)
 #endregion munging
 
-#region file & image info
 
-def file_size(file):
-    return os.stat(file).st_size
+#region image metadata (exif)
 
-def ignore_exceptions(func):
-    def wrapper(*args, **kwargs):
-        try:
-            return func(*args, **kwargs)
-        except Exception as e:
-            print(f"Error in {func.__name__}: {e}")
-            return None
-    return wrapper
-
-# @ignore_exceptions
-def get_exif(file):
-    try:
-        return PIL.Image.open(file)._getexif()
-    except:
-        pass 
+# def ignore_exceptions(func):
+#     def wrapper(*args, **kwargs):
+#         try:
+#             return func(*args, **kwargs)
+#         except Exception as e:
+#             print(f"Error in {func.__name__}: {e}")
+#             return None
+#     return wrapper
 
 @lru_cache
-def get_exif_data(file):
-    dt = None
-    lat = None
-    lon = None
+def get_exif(file):
+    ''' extract metadata from img
 
-    # try:
-    exif_data = {}
-    info = PIL.Image.open(file)._getexif()
-    if info:
-        for tag, value in info.items():
-            decoded = ExifTags.TAGS.get(tag, tag)
+    for k,v in PIL.ExifTags.TAGS.items():
+        if 'Date' in v:
+            print(k,v)
+        if 'GPSInfo' in v:
+            print(k,v)
+            
+    for i,j in enumerate(PIL.ExifTags.GPSTAGS.items()):
+        if i>6: break
+        print(j[0],j[1])
+    '''
+    dt, lat, lng = None, None, None
+    try:
+        exif = PIL.Image.open(file)._getexif()
+        dt = datetime.datetime.strptime(
+            exif[36867], #DateTimeOriginal 
+            "%Y:%m:%d %H:%M:%S")
 
-            # if decoded == "DateTimeOriginal":
-            #     dt = datetime.datetime.strptime(value, "%Y:%m:%d %H:%M:%S")
+        latref=exif[34853][1]
+        lat=exif[34853][2]
+        lngref=exif[34853][3]
+        lng=exif[34853][4]
 
-            if decoded == "GPSInfo":
-                gps_data = {}
-                for t in value:
-                    sub_decoded = ExifTags.GPSTAGS.get(t, t)
-                    gps_data[sub_decoded] = value[t]
-                exif_data[decoded] = gps_data
-            else:
-                exif_data[decoded] = value
+        def dms_to_decimal(deg, minutes, seconds, direction):
+            dec = deg + minutes/60 + seconds/3600
+            if direction in ['S', 'W']:
+                dec = -dec
+            return float(dec)
+        lat = dms_to_decimal(lat[0],lat[1],lat[2],exif[34853][1]) 
+        lng = dms_to_decimal(lng[0],lng[1],lng[2],exif[34853][3])
+    except Exception as e:
+        pass
+    
+    return dt,lat,lng
+#endregion image metadata
 
-    if "GPSInfo" in exif_data:		
-        gps_info = exif_data["GPSInfo"]
-
-        gps_latitude = gps_info.get('GPSLatitude')
-        gps_latitude_ref = gps_info.get('GPSLatitudeRef')
-        gps_longitude = gps_info.get('GPSLongitude')
-        gps_longitude_ref = gps_info.get('GPSLongitudeRef')
-
-        def to_degrees(value):
-            d0 = value[0][0]
-            d1 = value[0][1]
-            d = float(d0) / float(d1)
-
-            m0 = value[1][0]
-            m1 = value[1][1]
-            m = float(m0) / float(m1)
-
-            s0 = value[2][0]
-            s1 = value[2][1]
-            s = float(s0) / float(s1)
-            return d + (m / 60.0) + (s / 3600.0)
-
-        if gps_latitude and gps_latitude_ref and gps_longitude and gps_longitude_ref:
-            lat = to_degrees(gps_latitude)
-            if gps_latitude_ref != "N":                     
-                lat = 0 - lat
-
-            lon = to_degrees(gps_longitude)
-            if gps_longitude_ref != "E":
-                lon = 0 - lon
-    # except:
-    #     pass
-    return dt, lat, lon
-
-# requires api key
-# from urllib.request import urlopen
-# import json
-# def getplace(lat, lon):
-#     url = "http://maps.googleapis.com/maps/api/geocode/json?"
-#     url += "latlng=%s,%s&sensor=false" % (lat, lon)
-# #     print(url)
-#     v = urlopen(url).read()
-#     j = json.loads(v)
-#     components = j['results'][0]['address_components']
-#     country = town = None
-#     for c in components:
-#         if "country" in c['types']:
-#             country = c['long_name']
-#         if "postal_town" in c['types']:
-#             town = c['long_name']
-#     return town, country
-# ['results'][1]['formatted_address']
-
-#endregion file & image info
 
 #region faces
 def get_encodings(path):
@@ -168,6 +125,8 @@ def load_encodings(path):
 #endregion faces
 
 
+#region dedupe with opencv
+
 def hist(path):
     img = cv2.imread(path)
     hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
@@ -176,11 +135,12 @@ def hist(path):
     ranges=[0,180,0,256]
     return cv2.calcHist([hsv],hue_saturation,None,bins,ranges)
 
+#endregion dedupe with opencv
 
 
 if __name__=='__main__':
     file= '/mnt/4C74F47B74F468DA/Pictures/DSC_0024-2015-05-06 221910.JPG'
-    file ='/mnt/4C74F47B74F468DA/Pictures/IMG_1458-2016-12-18 025702.JPG'  # should have lat long
+    # file ='/mnt/4C74F47B74F468DA/Pictures/IMG_1458-2016-12-18 025702.JPG'  # should have lat long
     # file='/mnt/4C74F47B74F468DA/Pictures/BORE1037-2018-10-11 001716.JPG' #africa
     # file='/mnt/4C74F47B74F468DA/DCIM/201904__/IMG_0991.JPG'
     # file='/mnt/4C74F47B74F468DA/Pictures/n iphone/2022-01-07 001/Internal Storage/DCIM/101APPLE/IMG_1015.JPG'
@@ -188,9 +148,6 @@ if __name__=='__main__':
     thread_first(
         file,
         get_exif,
-        # get_exif_data,
-
-        # file_size,
         print
     )
 
