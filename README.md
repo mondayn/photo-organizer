@@ -11,14 +11,14 @@ I have many digital pics to cull through.  Awhile back I moved most from old fla
 ## Steps
 1. [profile](https://github.com/mondayn/photo-organizer/blob/main/1-profile.ipynb).  Exploration.  How many pics are there?  What can I derive easily?  Extracted file and image metadata.  
 1. [dedupe](https://github.com/mondayn/photo-organizer/blob/main/2-dedupe.ipynb) Can i identify duplicates or pics taken quickly together?  Looks like I can reduce several GB.
-1. [face preprocess](https://github.com/mondayn/photo-organizer/blob/main/3-face_preprocess.ipynb) Similar Apple photos, can I tag certain people in my photos? For privacy, I'll determine faces locally using dlib, and this old computer means I can't use GPU or its CNN model :( dlib does a good job finding faces, but I came across a couple of examples where it did not detect faces and after opening these in pix and saving with enhanced quality, dlib detects their faces.  So I'll test enhancing to improve recognition and see if reducing pic size reduces processing time without sacrificing accurancy.
+1. [face preprocess](https://github.com/mondayn/photo-organizer/blob/main/3-face_preprocess.ipynb) Similar to Apple photos, can I tag certain people in my photos? For privacy, I'll determine faces locally using dlib, and this old computer means I can't use GPU or its CNN model :( dlib does a good job finding faces, but I came across a couple of examples where I found face detection is better using OpenCV instead PIL.  I also found I can reduce image size for speedup without sacrificing any noticable accuracy.
 1. [labeling](https://github.com/mondayn/photo-organizer/blob/main/4-labeling.ipynb) Curate a few faces to recognize among my entire set.
 1. test, evaluate
 
 
 ## Lessons
-1. pix 'save as' enhanced helps dlib facial recognition
-1. facial rec wasn't good with skimage.  
+1. Sharpening, denoising or greyscale didn't improve face detection.
+1. facial rec wasn't good with library skimage.  
 
 
 ## Outcome
@@ -26,8 +26,7 @@ I have many digital pics to cull through.  Awhile back I moved most from old fla
 1. 
 
 ## ToDo
-1. should i reduce image size for speed?  is facial rec worse for smaller?
-1. is facial rec better for color or greyscale
+1. can i move pics to thumbdrive, to newer computer
 1. multi thread dlib?
 1. how many have geo lat and what are those locations?  are they important?
 1. perceptual hash - could i use to network similar pics?
