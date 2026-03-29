@@ -10,8 +10,15 @@ I have many digital pics to cull through.  Awhile back I moved most from old fla
 
 ## Steps
 1. [profile](https://github.com/mondayn/photo-organizer/blob/main/1-profile.ipynb).  Exploration.  How many pics are there?  What can I derive easily?  Extracted file and image metadata.  
-1. [dedupe](https://github.com/mondayn/photo-organizer/blob/main/2-dedupe.ipynb) Can i identify duplicates or pics taken quickly together?  Looks like I can reduce several GB.
-1. [face preprocess](https://github.com/mondayn/photo-organizer/blob/main/3-face_preprocess.ipynb) Similar to Apple photos, can I tag certain people in my photos? For privacy, I'll determine faces locally using dlib, and this old computer means I can't use GPU or its CNN model :( dlib does a good job finding faces, but I came across a couple of examples where I found face detection is better using OpenCV instead PIL.  I also found I can reduce image size for speedup without sacrificing any noticable accuracy.
+1. [dedupe](https://github.com/mondayn/photo-organizer/blob/main/2-dedupe.ipynb) Can i identify duplicates?  I find several GB of photos taken within minutes of each other with similar encodings.  Should I take the first of these dupes or find a way to score them?
+--add interesting
+
+1. [face preprocess](https://github.com/mondayn/photo-organizer/blob/main/3-face_preprocess.ipynb) Similar to Apple photos, can I tag certain people in my photos? For privacy, I'll determine faces locally using dlib.  I'm on an old CPU, so I'll use its gradient histogram, SVM algorithm instead of its CNN GPU approach.
+
+    I find dlib does a better job detecting faces for opencv instead of PIL images.
+
+    I find reducing image size provides a speedup without noticable accuracy loss.
+
 1. [labeling](https://github.com/mondayn/photo-organizer/blob/main/4-labeling.ipynb) Curate a few faces to recognize among my entire set.
 1. test, evaluate
 
@@ -26,6 +33,8 @@ I have many digital pics to cull through.  Awhile back I moved most from old fla
 1. 
 
 ## ToDo
+1. make dummy features based on family
+1. trying interesting scores
 1. can i move pics to thumbdrive, to newer computer
 1. multi thread dlib?
 1. how many have geo lat and what are those locations?  are they important?
@@ -38,5 +47,5 @@ I have many digital pics to cull through.  Awhile back I moved most from old fla
 -   /mnt/4C74F47B74F468DA/Pictures/IMG_0823-2005-01-04 015606.JPG -- blurry red nothing
 
 
-
+~~strikethrou
 
