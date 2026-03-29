@@ -109,7 +109,16 @@ def get_exif(file):
 #region faces
 def get_encodings(path):
     try:
-        return pipe(path,load_image_file,face_encodings)
+        img = cv2.imread(path)
+        h,w,c = img.shape
+        # print('current img size is',img.shape)
+        factor = min(h,w) / 275
+        # print('factor is ',factor)
+        img = cv2.resize(img,(int(w/factor),int(h/factor))) 
+        # print('resized to',img.shape)
+        encodings = face_encodings(img)
+        print('# faces found ',len(encodings)) 
+        return encodings
     except:
         return []
 
@@ -141,14 +150,13 @@ def hist(path):
 if __name__=='__main__':
     file= '/mnt/4C74F47B74F468DA/Pictures/DSC_0024-2015-05-06 221910.JPG'
     # file ='/mnt/4C74F47B74F468DA/Pictures/IMG_1458-2016-12-18 025702.JPG'  # should have lat long
-    # file='/mnt/4C74F47B74F468DA/Pictures/BORE1037-2018-10-11 001716.JPG' #africa
+    file='/mnt/4C74F47B74F468DA/Pictures/BORE1037-2018-10-11 001716.JPG' #africa
     # file='/mnt/4C74F47B74F468DA/DCIM/201904__/IMG_0991.JPG'
     # file='/mnt/4C74F47B74F468DA/Pictures/n iphone/2022-01-07 001/Internal Storage/DCIM/101APPLE/IMG_1015.JPG'
 
     thread_first(
         file,
-        get_exif,
-        print
+        # get_exif,
+        get_encodings,
+        # print
     )
-
-
