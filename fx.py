@@ -17,11 +17,11 @@ from IPython.display import Image, display
 from IPython.core.interactiveshell import InteractiveShell
 InteractiveShell.ast_node_interactivity = "all"
 
-from face_recognition import (
-    load_image_file, 
-    face_encodings,
-    compare_faces
-)
+# from face_recognition import (
+#     load_image_file, 
+#     face_encodings,
+#     compare_faces
+# )
 
 
 #endregion imports
