@@ -1,0 +1,5 @@
+__pycache__
+labeled_pics/
+*.jpg
+test*.py
+scratch*

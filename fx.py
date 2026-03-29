@@ -17,16 +17,14 @@ from IPython.display import Image, display
 from IPython.core.interactiveshell import InteractiveShell
 InteractiveShell.ast_node_interactivity = "all"
 
-# from face_recognition import (
-#     load_image_file, 
-#     face_encodings,
-#     compare_faces
-# )
-
-
+from face_recognition import (
+    load_image_file, 
+    face_encodings,
+    # compare_faces
+)
 #endregion imports
 
-#region munging
+#region munging, helpers
 def add_col(self,**kwargs):
     ''' assign new columns using itertuples, e.g. 
         df.add_col(
@@ -52,10 +50,11 @@ def get_dupes(df,column_names):
 
 for fx in [ add_col, print_cols, get_dupes, print_shape ]:
     setattr(pd.DataFrame, fx.__name__, fx)
-#endregion munging
 
-
-#region image metadata (exif)
+def ensure_lst(i):
+    if not isinstance(i,list):
+        return [i]
+    return i
 
 # def ignore_exceptions(func):
 #     def wrapper(*args, **kwargs):
@@ -65,6 +64,10 @@ for fx in [ add_col, print_cols, get_dupes, print_shape ]:
 #             print(f"Error in {func.__name__}: {e}")
 #             return None
 #     return wrapper
+
+#endregion munging, helpers
+
+#region images
 
 @lru_cache
 def get_exif(file):
@@ -103,10 +106,7 @@ def get_exif(file):
         pass
     
     return dt,lat,lng
-#endregion image metadata
 
-
-#region faces
 def get_encodings(path):
     try:
         img = cv2.imread(path)
@@ -117,7 +117,7 @@ def get_encodings(path):
         img = cv2.resize(img,(int(w/factor),int(h/factor))) 
         # print('resized to',img.shape)
         encodings = face_encodings(img)
-        print('# faces found ',len(encodings)) 
+        # print('# faces found ',len(encodings)) 
         return encodings
     except:
         return []
@@ -125,16 +125,12 @@ def get_encodings(path):
 def show(image):
     display(Image(image, width=100,))
 
-def save_encodings(path,encodings):
-    np.savez_compressed(path,encodings)
+# def save_encodings(path,encodings):
+#     np.savez_compressed(path,encodings)
 
-def load_encodings(path):
-    data = np.load(path)
-    return [data[f'arr_{i}'] for i in range(len(data.files))]
-#endregion faces
-
-
-#region dedupe with opencv
+# def load_encodings(path):
+#     data = np.load(path)
+#     return [data[f'arr_{i}'] for i in range(len(data.files))]
 
 def hist(path):
     img = cv2.imread(path)
@@ -144,7 +140,30 @@ def hist(path):
     ranges=[0,180,0,256]
     return cv2.calcHist([hsv],hue_saturation,None,bins,ranges)
 
-#endregion dedupe with opencv
+def sharpness(img):
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    return cv2.Laplacian(gray, cv2.CV_64F).var()
+
+def colorfulness(img):
+    (B, G, R) = cv2.split(img.astype("float"))
+    rg = np.abs(R - G)
+    yb = np.abs(0.5*(R + G) - B)
+    return np.sqrt(np.var(rg) + np.var(yb))
+
+def contrast(img):
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    return gray.std()
+
+def saliency(img):
+    ''' measure of 'standout' from opencv-contrib ''' 
+    saliency = cv2.saliency.StaticSaliencySpectralResidual_create()
+    (success, saliencyMap) = saliency.computeSaliency(img)
+    return saliencyMap.mean()
+
+#endregion images
+
+
+
 
 
 if __name__=='__main__':
