@@ -20,7 +20,6 @@ InteractiveShell.ast_node_interactivity = "all"
 from face_recognition import (
     load_image_file, 
     face_encodings,
-    # compare_faces
 )
 #endregion imports
 
@@ -107,15 +106,19 @@ def get_exif(file):
     
     return dt,lat,lng
 
+def resize(path):
+    img = cv2.imread(path)
+    h,w,c = img.shape
+    # print('current img size is',img.shape)
+    factor = min(h,w) / 275
+    # print('factor is ',factor)
+    img = cv2.resize(img,(int(w/factor),int(h/factor)))
+    # print('resized to',img.shape)
+    return img
+
 def get_encodings(path):
     try:
-        img = cv2.imread(path)
-        h,w,c = img.shape
-        # print('current img size is',img.shape)
-        factor = min(h,w) / 275
-        # print('factor is ',factor)
-        img = cv2.resize(img,(int(w/factor),int(h/factor))) 
-        # print('resized to',img.shape)
+        img = resize(path)
         encodings = face_encodings(img)
         # print('# faces found ',len(encodings)) 
         return encodings

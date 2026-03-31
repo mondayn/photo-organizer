@@ -28,6 +28,7 @@ I have many digital pics to cull through.  Awhile back I moved most from old fla
 ## ToDo
 1. can i move pics to thumbdrive, to newer computer
 1. multi thread dlib?
+1. https://github.com/openai/CLIP - for saliency?
 1. how many have geo lat and what are those locations?  are they important?
 1. perceptual hash - could i use to network similar pics?
 1. decide which of 1:many dupes to keep.  prefer larger or second?
@@ -37,8 +38,3 @@ I have many digital pics to cull through.  Awhile back I moved most from old fla
 
 -   /mnt/4C74F47B74F468DA/Pictures/IMG_0822-2005-01-04 015604.JPG -- blurry finger 
 -   /mnt/4C74F47B74F468DA/Pictures/IMG_0823-2005-01-04 015606.JPG -- blurry red nothing
-
-
-~~strikethrou
-
-https://github.com/mondayn/photo-organizer/blob/main/3-face_preprocess.ipynb
