@@ -12,6 +12,7 @@ I have many digital pics to cull through.  Awhile back I moved most from old fla
 1. [profile](https://github.com/mondayn/photo-organizer/blob/main/1-profile.ipynb).  Exploration.  How many pics are there?  What can I derive easily?  Extracted file and image metadata.  
 1. [dedupe](https://github.com/mondayn/photo-organizer/blob/main/2-dedupe.ipynb) Can i identify duplicates?  I find several GB of photos taken within minutes of each other with similar encodings.  Should I take the first of these dupes or find a way to score them?
 1. [faces](https://github.com/mondayn/photo-organizer/blob/main/3-faces.ipynb) Similar to Apple photos, can I tag certain people in my photos? For privacy, I'll determine faces locally using [dlib](https://dlib.net/face_recognition.py.html).  I'm on an old CPU, so I'll use its gradient histogram, SVM algorithm instead of its CNN GPU approach.
+1. filter on images with no identified faces and cluster on their embedding to identify a few more labels
 1. test, evaluate
 
 ## Lessons
@@ -19,6 +20,7 @@ I have many digital pics to cull through.  Awhile back I moved most from old fla
 1. facial rec wasn't good with library skimage.  
 1. I find dlib does a better job detecting faces for opencv instead of PIL images.
 1. I find reducing image size provides a speedup without noticable accuracy loss.
+1. my implementation of perceptual hash was imprecise and didn't do a good job separating images.
 
 
 ## Outcome
